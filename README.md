@@ -26,7 +26,7 @@ This restriction forces widespread and inconsistent naming conventions such as:
 - xArg, xInit, etc.
 - Short or cryptic parameter names
 
-These forced conventions reduce clarity and readability. The core reason is that the member‑initializer list lacks any syntax to explicitly say “this identifier is a member”.
+These forced conventions reduce clarity and readability. The core reason is that the member‑initializer list lacks any syntax to explicitly say “this identifier is a member”. The grammar does not permit a qualified identifiers such as *this->member* in a member‑initializer.
 
 The proposed design introduces explicit member designators in constructor initializer lists without altering any existing semantics. Initialization order, behavior, lookup rules, and overload resolution all remain unchanged.
 
