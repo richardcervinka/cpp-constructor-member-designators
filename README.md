@@ -6,9 +6,29 @@
 
 **Date:** 2026‑03‑20
 
-## 1. Introduction
+## Introduction
 
-This paper proposes a new syntactic form for member initialization in constructor initializer lists, inspired by C++20 designated initializers. The goal is to eliminate the long‑standing naming conflict between constructor parameters and class members, without introducing new keywords or breaking existing code.
+This paper proposes a minimal syntactic extension that allows constructors to explicitly refer to non‑static data members in the member‑initializer list using a member designator of the form *.\<member\>*. The feature introduces no new keywords, no changes to overload resolution, no changes to initialization order, and no interaction with C++20 aggregate designated initializers. Its purpose is to eliminate a long‑standing practical issue: parameters and members cannot share names in constructor initializer lists without naming conventions, because x{x} becomes ambiguous.
+
+## Motivation
+
+Today, constructors cannot directly write:
+
+```c++
+// Invalid, member and parameter share the same name
+Constructor(int value) : value{value} {}
+```
+
+This restriction forces widespread and inconsistent naming conventions such as:
+
+- m_x (member prefix)
+- x_ (member suffix)
+- xArg, xInit, etc.
+- Short or cryptic parameter names
+
+These forced conventions reduce clarity and readability. The core reason is that the member‑initializer list lacks any syntax to explicitly say “this identifier is a member”.
+
+The proposed design introduces explicit member designators in constructor initializer lists without altering any existing semantics. Initialization order, behavior, lookup rules, and overload resolution all remain unchanged.
 
 The proposed syntax allows writing:
 
@@ -16,69 +36,65 @@ The proposed syntax allows writing:
 Constructor(int value) : .value{value} {}
 ```
 
-This provides a clean, unambiguous way to refer to members of the object under construction, without requiring naming conventions such as 'm_' prefixes or '_' suffixes.
+This provides a clean, unambiguous way to refer to members of the object under construction, without requiring naming conventions.
 
-## 2. Motivation
+This proposal is not related to C++20 designated initializers (although the syntax is inspired by them), which apply only to aggregate initialization.
 
-C++ constructor parameters cannot share names with members, because the initializer list does not allow using this-> or any other explicit qualifier. This forces programmers to adopt naming conventions such as:
+## Scope
 
-- m_value (member prefix)
-- value_ (parameter suffix)
-- valueInit, valueArg, etc.
-- short, semantically poor parameter names (v, x0, rhs)
+This proposal applies only to constructor member‑initializer lists.
 
-These conventions are not enforced by the language, vary across codebases, and reduce readability. The root cause is that initializer lists lack a syntax for explicitly referring to members. This proposal introduces such a syntax.
+## Non‑Goals
 
-## 3. Proposed feature: Constructor Member Designators
+The feature does not:
 
-The proposal allows a leading . in constructor initializer lists to designate a member of the object being constructed.
+- modify overload resolution (constructors are selected exactly as today)
+- change initialization order (members are initialized in declaration order)
+- extend C++20 designated initializers (which remain aggregate‑only)
+- introduce named function arguments
+- introduce any new keywords
+- alter name lookup outside initializer lists
+
+## Basic Syntax
+
+The proposal allows a leading . in constructor initializer lists to designate a member of the object being constructed. This is purely syntactic sugar for the existing form x{x}, y{y}, but unambiguous and free from naming constraints.
 
 Syntax:
+
 ```
 : .member { expression }
 ```
 
-Meaning:
-
-.member refers to the member member of the object under construction.
-
-Example:
-
-```c++
-struct Vector
-{
-    Vector(float x, float y) : .x{x}, .y{y} {}
-
-    float x, y;
-};
-```
+- .member refers to the member member of the object under construction.
+- .member always refers to a non‑static data member of the same class.
+- .member cannot refer to parameters.
+- .member cannot refer to static data members.
+- .member cannot refer to inherited members (base subobjects).
+- .member cannot refer to anything outside the class.
 
 This eliminates naming conflicts without requiring any naming conventions.
 
-## 4. Design considerations
-
-### 4.1 No new keywords
-
 The proposal introduces no new keywords. The token . already exists and is unambiguous in this context.
 
-### 4.2 Consistency with C++20 designated initializers
 
-C++20 introduced:
-
-```c++
-Point p{ .x = 1, .y = 2 };
-```
-
-Constructor member designators are a natural extension of this syntax.
-
-### 4.3 Backward compatibility
+## Backward compatibility
 
 The syntax is fully backward compatible:
 - A leading . is currently invalid in initializer lists.
 - No existing code uses this form.
 - No macros or libraries are affected.
 
-### 4.4 Safety
+## Grammar Addition
+
+Extend the grammar for member‑initializer with:
+
+```
+member-initializer:
+    mem-initializer-id braced-init-list
+    . identifier        braced-init-list   // new: constructor member designator
+```
+
+## Safety
 
 The semantics mirror existing initializer list rules:
 - No method calls allowed.
@@ -86,9 +102,9 @@ The semantics mirror existing initializer list rules:
 - No access to uninitialized members.
 - Only direct member initialization.
 
-## 5. Examples
+## Examples
 
-### 5.1 Simple class
+### Simple class
 
 ```c++
 class Image
@@ -107,7 +123,7 @@ private:
 };
 ```
 
-### 5.2 Public members + constructor
+### Public members + constructor
 
 ```c++
 struct Vector
@@ -121,16 +137,7 @@ struct Vector
 };
 ```
 
-## 6. Implementation considerations
-
-This feature is syntactic sugar. It requires:
-- a parser change
-- no ABI changes
-- no changes to object layout
-- no changes to overload resolution
-- no changes to name lookup rules outside initializer lists
-
-## 7. Conclusion
+## Conclusion
 
 Constructor member designators:
 - solve a real, universal pain point
