@@ -61,6 +61,7 @@ Syntax:
 
 ```
 : .member { expression }
+: .member ( expression )
 ```
 
 - .member refers to the member member of the object under construction.
@@ -109,7 +110,7 @@ class Image
 {
 public:
     Image(std::string path, int width, int height) :
-        .path{std::move(path)},
+        .path(std::move(path)),
         .width{width},
         .height{height}
     {}
