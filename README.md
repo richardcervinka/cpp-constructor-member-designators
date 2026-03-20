@@ -8,7 +8,7 @@
 
 ## Introduction
 
-This paper proposes a minimal syntactic extension that allows constructors to explicitly refer to non‑static data members in the member‑initializer list using a member designator of the form *.\<member\>*. The feature introduces no new keywords, no changes to overload resolution, no changes to initialization order, and no interaction with C++20 aggregate designated initializers. Its purpose is to eliminate a long‑standing practical issue: parameters and members cannot share names in constructor initializer lists without naming conventions, because x{x} becomes ambiguous.
+This paper proposes a minimal syntactic extension that allows constructors to explicitly refer to non‑static data members in the member‑initializer list using a member designator of the form *.\<member\>*. The feature introduces no new keywords, no changes to overload resolution, no changes to initialization order, and no interaction with C++20 aggregate designated initializers (although the syntax is inspired by them). Its purpose is to eliminate a long‑standing practical issue: parameters and members cannot share names in constructor initializer lists without naming conventions, because x{x} becomes ambiguous.
 
 ## Motivation
 
@@ -37,8 +37,6 @@ Constructor(int value) : .value{value} {}
 ```
 
 This provides a clean, unambiguous way to refer to members of the object under construction, without requiring naming conventions.
-
-This proposal is not related to C++20 designated initializers (although the syntax is inspired by them), which apply only to aggregate initialization.
 
 ## Scope
 
