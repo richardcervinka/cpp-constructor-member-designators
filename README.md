@@ -12,10 +12,9 @@ This paper proposes a minimal syntactic extension that allows constructors to ex
 
 ## Motivation
 
-Today, constructors cannot directly write:
+Today, constructors can directly write this ambigious form:
 
 ```c++
-// Invalid, member and parameter share the same name
 Constructor(int value) : value{value} {}
 ```
 
@@ -46,12 +45,12 @@ This proposal applies only to constructor member‑initializer lists.
 
 The feature does not:
 
-- modify overload resolution (constructors are selected exactly as today)
-- change initialization order (members are initialized in declaration order)
-- extend C++20 designated initializers (which remain aggregate‑only)
-- introduce named function arguments
-- introduce any new keywords
-- alter name lookup outside initializer lists
+- Modify overload resolution (constructors are selected exactly as today)
+- Change initialization order (members are initialized in declaration order)
+- Extend C++20 designated initializers (which remain aggregate‑only)
+- Introduce named function arguments
+- Introduce any new keywords
+- Alter name lookup outside initializer lists
 
 ## Basic Syntax
 
