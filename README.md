@@ -18,7 +18,7 @@ Today, constructors can directly write this ambigious form:
 Constructor(int value) : value{value} {}
 ```
 
-This restriction forces widespread and inconsistent naming conventions such as:
+This forces widespread and inconsistent naming conventions such as:
 
 - m_x (member prefix)
 - x_ (member suffix)
